@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wallet</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(135deg, #6a85f1, #bfe9ff);
+    }
+    nav {
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      font-weight: 600;
+      background: transparent;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+    }
+    nav a.active {
+      border-bottom: 2px solid #fff;
+    }
+    .page-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .card {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      width: 100%;
+      max-width: 600px;
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 700;
+    }
+    p {
+      text-align: center;
+      font-size: 1rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="transactions.html">Transactions</a>
+    <a href="budget.html">Budget</a>
+    <a href="goals.html">Goals</a>
+    <a href="wallet.html" class="active">Wallet</a>
+    <a href="settings.html">Settings</a>
+  </nav>
+
+  <div class="page-container">
+    <div class="card">
+      <h1>Wallet</h1>
+      <p>Accounts summary will be shown here.</p>
+    </div>
+  </div>
+</body>
+</html>

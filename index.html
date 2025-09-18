@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin:0; font-family: 'Inter', sans-serif; background:#f8f9fb; color:#333;
+    }
+    .sidebar {
+      width:220px; background:#fff; height:100vh; position:fixed; top:0; left:0; box-shadow:2px 0 6px rgba(0,0,0,0.05); padding:2rem 1rem; display:flex; flex-direction:column; gap:1.5rem;
+    }
+    .sidebar h2 { font-size:1.2rem; color:#555; margin:0; }
+    .sidebar a { text-decoration:none; color:#555; font-weight:500; padding:.6rem 1rem; border-radius:8px; transition:all .2s; }
+    .sidebar a.active, .sidebar a:hover { background:#6a85f1; color:#fff; }
+    .main { margin-left:220px; padding:1.5rem; }
+    header { display:flex; justify-content:space-between; align-items:center; }
+    header input { padding:.6rem 1rem; border:1px solid #ddd; border-radius:8px; width:260px; }
+    .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:1.5rem; }
+    .card { border-radius:16px; padding:1.5rem; color:#fff; font-weight:600; }
+    .card .value { font-size:1.6rem; margin:.5rem 0; }
+    .card.green { background:linear-gradient(135deg,#20c997,#48dbb3); }
+    .card.blue { background:linear-gradient(135deg,#4dabf7,#5c7cfa); }
+    .card.red { background:linear-gradient(135deg,#ff6b6b,#f06595); }
+    .card.purple { background:linear-gradient(135deg,#9b5de5,#c77dff); }
+    .charts { display:grid; grid-template-columns:2fr 1fr; gap:1.5rem; margin-top:2rem; }
+    .chart-card { background:#fff; border-radius:16px; padding:1rem; box-shadow:0 4px 16px rgba(0,0,0,.05); }
+    h3 { margin:0 0 .5rem; font-size:1rem; color:#444; }
+    table { width:100%; border-collapse:collapse; margin-top:1rem; }
+    th,td { padding:.6rem; text-align:left; border-bottom:1px solid #eee; font-size:.9rem; }
+    .goals { margin-top:2rem; }
+    .goal { margin-bottom:1rem; }
+    .progress { height:8px; background:#eee; border-radius:4px; overflow:hidden; }
+    .progress span { display:block; height:100%; background:#6a85f1; }
+    .fadeIn { animation:fadeIn .8s ease forwards; opacity:0; }
+    @keyframes fadeIn { to{opacity:1; transform:none;} from{opacity:0; transform:translateY(10px);} }
+  </style>
+</head>
+<body>
+  <script>
+    if(!localStorage.getItem("loggedInUser")) location.href="login.html";
+  </script>
+
+  <div class="sidebar">
+    <h2>FINCHECK</h2>
+    <a href="index.html" class="active">Dashboard</a>
+    <a href="transactions.html">Transactions</a>
+    <a href="budget.html">Budget</a>
+    <a href="goals.html">Goals</a>
+    <a href="wallet.html">Wallet</a>
+    <a href="settings.html">Settings</a>
+    <a href="login.html" onclick="localStorage.removeItem('loggedInUser')">Log out</a>
+  </div>
+
+  <div class="main">
+    <header>
+      <div>
+        <h2>Welcome back, <span id="userName">User</span>!</h2>
+        <small>It’s a great day to track your finances.</small>
+      </div>
+      <input type="text" placeholder="Search...">
+    </header>
+
+    <div class="cards fadeIn">
+      <div class="card green">
+        <div>Total Balance</div>
+        <div class="value" id="balance">$0.00</div>
+        <small id="deltaBalance">+22% vs last month</small>
+      </div>
+      <div class="card blue">
+        <div>Total Income</div>
+        <div class="value" id="income">$0.00</div>
+        <small>+36% vs last month</small>
+      </div>
+      <div class="card red">
+        <div>Total Expenses</div>
+        <div class="value" id="expense">$0.00</div>
+        <small>-11% vs last month</small>
+      </div>
+      <div class="card purple">
+        <div>Total Savings</div>
+        <div class="value" id="savings">$0.00</div>
+        <small>+15% vs last month</small>
+      </div>
+    </div>
+
+    <div class="charts">
+      <div class="chart-card">
+        <h3>Total Income</h3>
+        <canvas id="lineChart" height="120"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Activity</h3>
+        <canvas id="donutChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card goals">
+      <h3>My Goals</h3>
+      <div class="goal">
+        <div>Travel <span style="float:right">$1,000 / $2,000</span></div>
+        <div class="progress"><span style="width:50%"></span></div>
+      </div>
+      <div class="goal">
+        <div>Car <span style="float:right">$8,500 / $42,500</span></div>
+        <div class="progress"><span style="width:20%"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Show logged in name
+    const user=JSON.parse(localStorage.getItem("loggedInUser"));
+    if(user) document.getElementById("userName").textContent=user.name;
+
+    // Dummy values
+    const txns=JSON.parse(localStorage.getItem("txns")||"[]");
+    const income=txns.filter(t=>t.type==="income").reduce((a,b)=>a+b.amount,4778);
+    const expense=txns.filter(t=>t.type==="expense").reduce((a,b)=>a+b.amount,2103);
+    const balance=income-expense;
+    const savings=9500;
+    document.getElementById("income").textContent="$"+income.toLocaleString();
+    document.getElementById("expense").textContent="$"+expense.toLocaleString();
+    document.getElementById("balance").textContent="$"+balance.toLocaleString();
+    document.getElementById("savings").textContent="$"+savings.toLocaleString();
+
+    // Line chart
+    new Chart(document.getElementById("lineChart"), {
+      type:"line",
+      data:{
+        labels:["Jan","Feb","Mar","Apr","May","Jun"],
+        datasets:[{
+          label:"Income",
+          data:[2000,3000,4000,4653,3800,4200],
+          fill:false,
+          borderColor:"#6a85f1",
+          tension:.3
+        }]
+      },
+      options:{responsive:true,plugins:{legend:{display:false}}}
+    });
+
+    // Donut chart
+    new Chart(document.getElementById("donutChart"), {
+      type:"doughnut",
+      data:{
+        labels:["House","Food","Investing","Online Shop","Beauty"],
+        datasets:[{data:[32,25,17,16,10],
+          backgroundColor:["#4dabf7","#ff6b6b","#20c997","#9775fa","#ffa94d"]}]
+      },
+      options:{responsive:true,plugins:{legend:{position:"bottom"}}}
+    });
+  </script>
+</body>
+</html>
